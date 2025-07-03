@@ -8,7 +8,7 @@ This is a sample project made using vite and react to learn how to upload and pr
 -   Normalizzazione
 -   Sorting
 -   Search bar
--   Controllare natura del file
+-   Controllare natura del file ✔️
 -   Filtro generico
 -   Multi csv
 -   Paginazione ✔️
