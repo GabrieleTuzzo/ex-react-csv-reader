@@ -68,7 +68,7 @@ function App() {
                             </button>
                         </div>
                         <div className="bg-white rounded shadow overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
+                            <table className="table-auto min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>
                                         {Object.keys(data[0]).map((key) => (
@@ -81,7 +81,7 @@ function App() {
                                         ))}
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="divide-y divide-gray-200">
                                     {data.map((row, index) => {
                                         if (
                                             skipEmpty &&
@@ -93,12 +93,19 @@ function App() {
                                         }
 
                                         return (
-                                            <tr key={index}>
+                                            <tr
+                                                key={index}
+                                                className="border-none even:bg-gray-50 odd:bg-white"
+                                            >
                                                 {Object.values(row).map(
                                                     (value, index) => (
                                                         <td
                                                             key={index}
-                                                            className="px-6 py-4 whitespace-nowrap text-sm text-gray-700"
+                                                            className={`${
+                                                                value
+                                                                    ? ''
+                                                                    : 'bg-red-100'
+                                                            } px-6 py-4 whitespace-nowrap text-sm text-gray-700`}
                                                         >
                                                             {value}
                                                         </td>
