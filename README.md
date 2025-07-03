@@ -11,7 +11,7 @@ This is a sample project made using vite and react to learn how to upload and pr
 -   Controllare natura del file
 -   Filtro generico
 -   Multi csv
--   Paginazione
+-   Paginazione ✔️
 -   Sort delle colonne
 -   Bulk / Selezione multipla
 -   Nascondere colonne
