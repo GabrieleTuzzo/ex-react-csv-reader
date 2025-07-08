@@ -1,16 +1,27 @@
 import './App.css';
 import { useState } from 'react';
+import usePagination from './hooks/usePagination';
 import Papa from 'papaparse';
 
 function App() {
     const [data, setData] = useState([]);
     const [skipEmpty, setSkipEmpty] = useState(false);
 
+    // Order states
+    const [order, setOrder] = useState({
+        column: 'name',
+        direction: 'desc', // 'asc' or 'desc'
+    });
+
     // Pagination state and Indexes
-    const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
-    const startIdx = (currentPage - 1) * rowsPerPage;
-    const endIdx = startIdx + rowsPerPage;
+    const {
+        currentPage,
+        nextPage,
+        previousPage,
+        pageStartIndex,
+        pageEndIndex,
+        pagesNumber,
+    } = usePagination(data.length, 1, 10);
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -37,6 +48,56 @@ function App() {
         });
     };
 
+    const manageOrderIcons = (key) => {
+        if (order.column !== key) {
+            return (
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                    className="size-4"
+                >
+                    <path d="M3.75 7.25a.75.75 0 0 0 0 1.5h8.5a.75.75 0 0 0 0-1.5h-8.5Z" />
+                </svg>
+            );
+        }
+
+        switch (order.direction) {
+            case 'asc':
+                return (
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        fill="currentColor"
+                        className="size-4"
+                    >
+                        <path
+                            fillRule="evenodd"
+                            d="M11.78 9.78a.75.75 0 0 1-1.06 0L8 7.06 5.28 9.78a.75.75 0 0 1-1.06-1.06l3.25-3.25a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06Z"
+                            clipRule="evenodd"
+                        />
+                    </svg>
+                );
+            case 'desc':
+                return (
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 16 16"
+                        fill="currentColor"
+                        class="size-4"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
+                            clip-rule="evenodd"
+                        />
+                    </svg>
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
             <div className="bg-white shadow-md rounded p-6 w-full max-w-md">
@@ -46,7 +107,7 @@ function App() {
                 <form className="flex flex-col items-center">
                     <label
                         htmlFor="csvFile"
-                        className="text-gray-700 text-l font-semibold border-2 border-gray-300 py-1 px-2 rounded cursor-pointer hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="text-gray-700 text-l font-semibold border-2 border-gray-300 py-1 px-2 rounded cursor-pointer hover:bg-gray-100"
                     >
                         Upload CSV file
                     </label>
@@ -68,7 +129,7 @@ function App() {
                         </h2>
                         <button
                             onClick={() => setSkipEmpty((prev) => !prev)}
-                            className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded hover:bg-blue-700 cursor-pointer"
                         >
                             {skipEmpty
                                 ? 'Show All Rows'
@@ -82,16 +143,20 @@ function App() {
                                     {Object.keys(data[0]).map((key) => (
                                         <th
                                             key={key}
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                         >
-                                            {key}
+                                            <div className="flex items-center gap-2">
+                                                {key}
+
+                                                {manageOrderIcons(key)}
+                                            </div>
                                         </th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
                                 {data
-                                    .slice(startIdx, endIdx)
+                                    .slice(pageStartIndex, pageEndIndex)
                                     .map((row, index) => {
                                         if (
                                             skipEmpty &&
@@ -129,11 +194,9 @@ function App() {
                     </div>
                     <div className="mt-2 flex justify-center gap-5">
                         <button
-                            onClick={() =>
-                                setCurrentPage((p) => Math.max(p - 1, 1))
-                            }
+                            onClick={() => previousPage()}
                             disabled={currentPage === 1}
-                            className="text-white bg-blue-600 rounded px-3"
+                            className="text-white bg-blue-600 rounded px-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -151,13 +214,12 @@ function App() {
                             </svg>
                         </button>
                         <span>
-                            {currentPage} of{' '}
-                            {Math.ceil(data.length / rowsPerPage)}
+                            {currentPage} of {pagesNumber}
                         </span>
                         <button
-                            onClick={() => setCurrentPage((p) => p + 1)}
-                            disabled={endIdx >= data.length}
-                            className="text-2xl text-white bg-blue-600 rounded px-3"
+                            onClick={() => nextPage()}
+                            disabled={currentPage >= pagesNumber}
+                            className="text-white bg-blue-600 rounded px-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
