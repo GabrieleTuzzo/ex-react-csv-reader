@@ -1,7 +1,10 @@
 import './App.css';
 import { useState } from 'react';
-import usePagination from './hooks/usePagination';
 import Papa from 'papaparse';
+// Custom hooks
+import usePagination from './hooks/usePagination';
+// Custom components
+import Button from './components/Button';
 
 function App() {
     const [data, setData] = useState([]);
@@ -13,7 +16,7 @@ function App() {
         direction: 'desc', // 'asc' or 'desc'
     });
 
-    // Pagination state and Indexes
+    // Pagination custom hook
     const {
         currentPage,
         nextPage,
@@ -127,14 +130,11 @@ function App() {
                         <h2 className="text-2xl font-bold text-gray-800">
                             CSV Data Preview
                         </h2>
-                        <button
-                            onClick={() => setSkipEmpty((prev) => !prev)}
-                            className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded hover:bg-blue-700 cursor-pointer"
-                        >
+                        <Button onClick={() => setSkipEmpty((prev) => !prev)}>
                             {skipEmpty
                                 ? 'Show All Rows'
                                 : 'Hide Rows With Empty Fields'}
-                        </button>
+                        </Button>
                     </div>
                     <div className="bg-white rounded shadow overflow-x-auto">
                         <table className="table-auto min-w-full divide-y divide-gray-200">
@@ -193,10 +193,9 @@ function App() {
                         </table>
                     </div>
                     <div className="mt-2 flex justify-center gap-5">
-                        <button
+                        <Button
                             onClick={() => previousPage()}
                             disabled={currentPage === 1}
-                            className="text-white bg-blue-600 rounded px-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -212,14 +211,13 @@ function App() {
                                     d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
                                 />
                             </svg>
-                        </button>
+                        </Button>
                         <span>
                             {currentPage} of {pagesNumber}
                         </span>
-                        <button
+                        <Button
                             onClick={() => nextPage()}
                             disabled={currentPage >= pagesNumber}
-                            className="text-white bg-blue-600 rounded px-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -235,7 +233,7 @@ function App() {
                                     d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
                                 />
                             </svg>
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}
