@@ -11,6 +11,10 @@ function App() {
     const [data, setData] = useState([]);
     const [skipEmpty, setSkipEmpty] = useState(false);
 
+    // Calculate the number of columns based on the first row of data
+    const columnCount = data.length > 0 ? Object.keys(data[0]).length : 0;
+    const colWidthClass = `w-[${(100 / columnCount).toFixed(4)}%]`;
+
     // Sorting hook
     const { sortedArray, updateSortingOrder, sortingOptions } = useSorting(
         data,
@@ -99,7 +103,7 @@ function App() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+        <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
             <div className="bg-white shadow-md rounded p-6 w-full max-w-md">
                 <h1 className="text-3xl font-bold text-blue-700 mb-6 text-center">
                     Csv Previewer
@@ -122,7 +126,7 @@ function App() {
             </div>
 
             {sortedArray.length > 0 && (
-                <div className="mt-6 w-full max-w-5xl">
+                <div className="mt-6 w-full">
                     <div className="flex items-center justify-between mb-4 align-items-center">
                         <h2 className="text-2xl font-bold text-gray-800">
                             CSV Data Preview
@@ -134,7 +138,7 @@ function App() {
                         </Button>
                     </div>
                     <div className="bg-white rounded shadow overflow-x-auto">
-                        <table className="table-auto min-w-full divide-y divide-gray-200">
+                        <table className="table-fixed min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
                                     {Object.keys(data[0]).map((key) => (
@@ -143,7 +147,8 @@ function App() {
                                                 updateSortingOrder(key)
                                             }
                                             key={key}
-                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                                            className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100
+                                            ${colWidthClass} truncate overflow-hidden`}
                                         >
                                             <div className="flex items-center gap-2">
                                                 {key}
@@ -180,7 +185,7 @@ function App() {
                                                                 value
                                                                     ? ''
                                                                     : 'bg-red-100'
-                                                            } px-6 py-4 whitespace-nowrap text-sm text-gray-700`}
+                                                            } px-6 py-4 whitespace-nowrap text-sm text-gray-700 ${colWidthClass} truncate overflow-hidden max-w-2xl`}
                                                         >
                                                             {value}
                                                         </td>
