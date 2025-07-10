@@ -3,6 +3,7 @@ import { useState } from 'react';
 import Papa from 'papaparse';
 // Custom hooks
 import usePagination from './hooks/usePagination';
+import useSorting from './hooks/useSorting';
 // Custom components
 import Button from './components/Button';
 
@@ -10,11 +11,14 @@ function App() {
     const [data, setData] = useState([]);
     const [skipEmpty, setSkipEmpty] = useState(false);
 
-    // Order states
-    const [order, setOrder] = useState({
-        column: 'name',
-        direction: 'desc', // 'asc' or 'desc'
-    });
+    // Sorting hook
+    const { sortedArray, updateSortingOrder, sortingOptions } = useSorting(
+        data,
+        {
+            orderBy: '',
+            orderAsc: true,
+        }
+    );
 
     // Pagination custom hook
     const {
@@ -52,7 +56,7 @@ function App() {
     };
 
     const manageOrderIcons = (key) => {
-        if (order.column !== key) {
+        if (sortingOptions.orderBy !== key) {
             return (
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -65,40 +69,33 @@ function App() {
             );
         }
 
-        switch (order.direction) {
-            case 'asc':
-                return (
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 16 16"
-                        fill="currentColor"
-                        className="size-4"
-                    >
-                        <path
-                            fillRule="evenodd"
-                            d="M11.78 9.78a.75.75 0 0 1-1.06 0L8 7.06 5.28 9.78a.75.75 0 0 1-1.06-1.06l3.25-3.25a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06Z"
-                            clipRule="evenodd"
-                        />
-                    </svg>
-                );
-            case 'desc':
-                return (
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 16 16"
-                        fill="currentColor"
-                        class="size-4"
-                    >
-                        <path
-                            fill-rule="evenodd"
-                            d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
-                            clip-rule="evenodd"
-                        />
-                    </svg>
-                );
-            default:
-                return null;
-        }
+        return sortingOptions.orderAsc ? (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                className="size-4"
+            >
+                <path
+                    fillRule="evenodd"
+                    d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
+                    clipRule="evenodd"
+                />
+            </svg>
+        ) : (
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                className="size-4"
+            >
+                <path
+                    fillRule="evenodd"
+                    d="M11.78 9.78a.75.75 0 0 1-1.06 0L8 7.06 5.28 9.78a.75.75 0 0 1-1.06-1.06l3.25-3.25a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06Z"
+                    clipRule="evenodd"
+                />
+            </svg>
+        );
     };
 
     return (
@@ -124,7 +121,7 @@ function App() {
                 </form>
             </div>
 
-            {data.length > 0 && (
+            {sortedArray.length > 0 && (
                 <div className="mt-6 w-full max-w-5xl">
                     <div className="flex items-center justify-between mb-4 align-items-center">
                         <h2 className="text-2xl font-bold text-gray-800">
@@ -142,6 +139,9 @@ function App() {
                                 <tr>
                                     {Object.keys(data[0]).map((key) => (
                                         <th
+                                            onClick={() =>
+                                                updateSortingOrder(key)
+                                            }
                                             key={key}
                                             className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                                         >
@@ -155,7 +155,7 @@ function App() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                                {data
+                                {sortedArray
                                     .slice(pageStartIndex, pageEndIndex)
                                     .map((row, index) => {
                                         if (
